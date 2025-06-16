@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from delivery.models import Customer, Restaurants, Menu, Cart
 from delivery.forms import ResForm, MenuForm
 from django.conf import settings
-
+# import razorpay
 # Create your views here.
 def index(request):
     return render(request,'delivery/index.html')
@@ -112,13 +112,25 @@ def checkout(request, username):
     if total_price == 0:
         return render(request, 'delivery/checkout.html',{'error':'Your cart is Empty'})
 
-
+    #client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
     order_data = {
         'amount':int(total_price * 100),
         'currency':'INR',
         'payment_capture':'1',
     }
+    # order = client.order.create(data = order_data)
+    return render(
+        request, 'delivery/checkout.html',
+        {'username':username,
+        'cart_items':cart_items,
+        'total_price':total_price,
+        'razorpay_key_id':settings.RAZORPAY_KEY_ID,
+        #'order_id':order['id'],
+        'amount':total_price,
+        }
+    )
+
 def orders(request, username):
         customer = Customer.objects.get(username = username)
         cart = Cart.objects.filter(customer=customer).first()
@@ -134,4 +146,3 @@ def orders(request, username):
         'total_price':total_price,
         'customer':customer
         })
-
